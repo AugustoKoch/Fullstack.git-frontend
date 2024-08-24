@@ -1,11 +1,14 @@
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client'; // Atualizado para importar createRoot
 import './index.css';
 import App from './App';
 
-ReactDOM.render(
+// Crie a raiz do React no elemento com id 'root'
+const root = createRoot(document.getElementById('root'));
+
+// Renderize o aplicativo usando a nova API
+root.render(
   <React.StrictMode>
     <App />
-  </React.StrictMode>,
-  document.getElementById('root')
+  </React.StrictMode>
 );
