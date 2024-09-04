@@ -1,41 +1,65 @@
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import Button from '@mui/material/Button';
-import Container from '@mui/material/Container'; // Import Container from Material-UI
+import Container from '@mui/material/Container';
 import IconButton from '@mui/material/IconButton';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemSecondaryAction from '@mui/material/ListItemSecondaryAction';
 import ListItemText from '@mui/material/ListItemText';
 import TextField from '@mui/material/TextField';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 /**
  * Componente LivroList - Lista de Livros com funcionalidade CRUD (Create, Read, Update, Delete).
  * Este componente permite adicionar, editar e remover livros de uma lista.
- * Ele utiliza dados mockados para simular um backend, facilitando o teste.
  */
 function LivroList() {
-  const [livros, setLivros] = useState([
-    { id: 1, titulo: 'Livro A', autor: 'Autor A' },
-    { id: 2, titulo: 'Livro B', autor: 'Autor B' },
-  ]);
-
+  const [livros, setLivros] = useState([]);
   const [titulo, setTitulo] = useState('');
   const [autor, setAutor] = useState('');
   const [editId, setEditId] = useState(null);
 
+  // Carregar os livros do backend na inicialização
+  useEffect(() => {
+    fetch('http://localhost:8080/api/livros')
+      .then(response => response.json())
+      .then(data => setLivros(data))
+      .catch(error => console.error('Erro ao buscar livros:', error));
+  }, []);
+
   // Função para salvar um novo livro ou atualizar um existente
   const handleSave = () => {
-    if (editId) {
-      setLivros(livros.map(livro => livro.id === editId ? { id: editId, titulo, autor } : livro));
-      setEditId(null);
-    } else {
-      const newLivro = { id: livros.length + 1, titulo, autor };
-      setLivros([...livros, newLivro]);
-    }
-    setTitulo('');
-    setAutor('');
+    const livro = { titulo, autor };
+
+    const method = editId ? 'PUT' : 'POST';
+    const url = editId
+      ? `http://localhost:8080/api/livros/${editId}`
+      : 'http://localhost:8080/api/livros';
+
+    fetch(url, {
+      method,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(livro),
+    })
+      .then(response => response.json())
+      .then(data => {
+        setLivros(prevLivros => {
+          if (editId) {
+            return prevLivros.map(livro =>
+              livro.id === editId ? data : livro
+            );
+          } else {
+            return [...prevLivros, data];
+          }
+        });
+        setTitulo('');
+        setAutor('');
+        setEditId(null);
+      })
+      .catch(error => console.error('Erro ao salvar livro:', error));
   };
 
   // Função para editar um livro (preencher o formulário com os dados do livro selecionado)
@@ -47,7 +71,13 @@ function LivroList() {
 
   // Função para excluir um livro da lista
   const handleDelete = (id) => {
-    setLivros(livros.filter(livro => livro.id !== id));
+    fetch(`http://localhost:8080/api/livros/${id}`, {
+      method: 'DELETE',
+    })
+      .then(() => {
+        setLivros(livros.filter(livro => livro.id !== id));
+      })
+      .catch(error => console.error('Erro ao deletar livro:', error));
   };
 
   return (
