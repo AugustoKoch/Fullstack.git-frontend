@@ -1,53 +1,86 @@
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import Button from '@mui/material/Button';
-import Container from '@mui/material/Container'; // Import Container from Material-UI
+import Container from '@mui/material/Container';
 import IconButton from '@mui/material/IconButton';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemSecondaryAction from '@mui/material/ListItemSecondaryAction';
 import ListItemText from '@mui/material/ListItemText';
 import TextField from '@mui/material/TextField';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 /**
  * Componente UsuarioList - Lista de Usuários com funcionalidade CRUD (Create, Read, Update, Delete).
  * Este componente permite adicionar, editar e remover usuários de uma lista.
- * Ele utiliza dados mockados para simular um backend, facilitando o teste.
+ * Ele utiliza dados do backend, com integração via API.
  */
 function UsuarioList() {
-  const [usuarios, setUsuarios] = useState([
-    { id: 1, nome: 'Usuário A', email: 'usuarioa@example.com' },
-    { id: 2, nome: 'Usuário B', email: 'usuariob@example.com' },
-  ]);
-
+  const [usuarios, setUsuarios] = useState([]);
   const [nome, setNome] = useState('');
   const [email, setEmail] = useState('');
   const [editId, setEditId] = useState(null);
 
-  // Função para salvar um novo usuário ou atualizar um existente
+  useEffect(() => {
+    fetch('http://localhost:8080/api/usuarios')
+      .then(response => response.json())
+      .then(data => setUsuarios(data))
+      .catch(error => console.error('Erro ao buscar usuários:', error));
+  }, []);
+
   const handleSave = () => {
+    const usuario = { nome, email };
+    
     if (editId) {
-      setUsuarios(usuarios.map(usuario => usuario.id === editId ? { id: editId, nome, email } : usuario));
-      setEditId(null);
+      // Atualizar um usuário existente
+      fetch(`http://localhost:8080/api/usuarios/${editId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(usuario),
+      })
+      .then(response => response.json())
+      .then(updatedUsuario => {
+        setUsuarios(usuarios.map(usuario => usuario.id === editId ? updatedUsuario : usuario));
+        setEditId(null);
+        setNome('');
+        setEmail('');
+      })
+      .catch(error => console.error('Erro ao atualizar usuário:', error));
     } else {
-      const newUsuario = { id: usuarios.length + 1, nome, email };
-      setUsuarios([...usuarios, newUsuario]);
+      // Criar um novo usuário
+      fetch('http://localhost:8080/api/usuarios', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(usuario),
+      })
+      .then(response => response.json())
+      .then(newUsuario => {
+        setUsuarios([...usuarios, newUsuario]);
+        setNome('');
+        setEmail('');
+      })
+      .catch(error => console.error('Erro ao salvar usuário:', error));
     }
-    setNome('');
-    setEmail('');
   };
 
-  // Função para editar um usuário (preencher o formulário com os dados do usuário selecionado)
   const handleEdit = (usuario) => {
     setNome(usuario.nome);
     setEmail(usuario.email);
     setEditId(usuario.id);
   };
 
-  // Função para excluir um usuário da lista
   const handleDelete = (id) => {
-    setUsuarios(usuarios.filter(usuario => usuario.id !== id));
+    fetch(`http://localhost:8080/api/usuarios/${id}`, {
+      method: 'DELETE',
+    })
+    .then(() => {
+      setUsuarios(usuarios.filter(usuario => usuario.id !== id));
+    })
+    .catch(error => console.error('Erro ao excluir usuário:', error));
   };
 
   return (
