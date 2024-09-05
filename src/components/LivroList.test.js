@@ -1,63 +1,108 @@
 import '@testing-library/jest-dom';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor, act } from '@testing-library/react';
 import React from 'react';
 import LivroList from './LivroList';
 
-test('renders LivroList component', () => {
+// Mockando fetch API
+global.fetch = jest.fn();
+
+beforeEach(() => {
+  fetch.mockClear();
+});
+
+test('renders LivroList component', async () => {
+  fetch.mockResolvedValueOnce({
+    json: async () => [
+      { id: 1, titulo: 'Livro A', autor: 'Autor A' },
+      { id: 2, titulo: 'Livro B', autor: 'Autor B' }
+    ]
+  });
+
   render(<LivroList />);
   
   // Verifica se o título da página está presente
   expect(screen.getByText('Lista de Livros')).toBeInTheDocument();
+
+  // Verifica se os livros são carregados
+  await waitFor(() => {
+    expect(screen.getByText('Livro A - Autor A')).toBeInTheDocument();
+    expect(screen.getByText('Livro B - Autor B')).toBeInTheDocument();
+  });
 });
 
-test('adds a new book', () => {
+test('adds a new book', async () => {
+  fetch.mockResolvedValueOnce({
+    json: async () => []
+  });
+
+  fetch.mockResolvedValueOnce({
+    json: async () => ({ id: 3, titulo: 'Livro C', autor: 'Autor C' })
+  });
+
   render(<LivroList />);
   
   // Adiciona um novo livro
-  fireEvent.change(screen.getByLabelText('Título'), { target: { value: 'Livro C' } });
-  fireEvent.change(screen.getByLabelText('Autor'), { target: { value: 'Autor C' } });
-  fireEvent.click(screen.getByText('Salvar'));
+  await act(async () => {
+    fireEvent.change(screen.getByLabelText('Título'), { target: { value: 'Livro C' } });
+    fireEvent.change(screen.getByLabelText('Autor'), { target: { value: 'Autor C' } });
+    fireEvent.click(screen.getByText('Salvar'));
+  });
   
   // Verifica se o novo livro foi adicionado
-  expect(screen.getByText('Livro C - Autor C')).toBeInTheDocument();
+  await waitFor(() => {
+    expect(screen.getByText('Livro C - Autor C')).toBeInTheDocument();
+  });
 });
 
-test('edits an existing book', () => {
+test('edits an existing book', async () => {
+  fetch.mockResolvedValueOnce({
+    json: async () => [
+      { id: 1, titulo: 'Livro C', autor: 'Autor C' }
+    ]
+  });
+
+  fetch.mockResolvedValueOnce({
+    json: async () => ({ id: 1, titulo: 'Livro D', autor: 'Autor D' })
+  });
+
   render(<LivroList />);
-  
-  // Adiciona um novo livro
-  fireEvent.change(screen.getByLabelText('Título'), { target: { value: 'Livro C' } });
-  fireEvent.change(screen.getByLabelText('Autor'), { target: { value: 'Autor C' } });
-  fireEvent.click(screen.getByText('Salvar'));
   
   // Edita o livro adicionado
-  fireEvent.click(screen.getAllByRole('button', { name: /edit/i })[0]); // Seleciona o botão de editar
-  fireEvent.change(screen.getByLabelText('Título'), { target: { value: 'Livro D' } });
-  fireEvent.change(screen.getByLabelText('Autor'), { target: { value: 'Autor D' } });
-  fireEvent.click(screen.getByText('Atualizar'));
+  await act(async () => {
+    await waitFor(() => fireEvent.click(screen.getByLabelText('edit'))); // Seleciona o botão de editar
+    fireEvent.change(screen.getByLabelText('Título'), { target: { value: 'Livro D' } });
+    fireEvent.change(screen.getByLabelText('Autor'), { target: { value: 'Autor D' } });
+    fireEvent.click(screen.getByText('Atualizar'));
+  });
+
   
   // Verifica se o livro foi atualizado
-  expect(screen.getByText('Livro D - Autor D')).toBeInTheDocument();
+  await waitFor(() => {
+    expect(screen.getByText('Livro D - Autor D')).toBeInTheDocument();
+  });
 });
 
-/*
 test('deletes a book', async () => {
+  fetch.mockResolvedValueOnce({
+    json: async () => [
+      { id: 1, titulo: 'Livro C', autor: 'Autor C' }
+    ]
+  });
+
+  fetch.mockResolvedValueOnce({
+    json: async () => ({})
+  });
+
   render(<LivroList />);
   
-  // Adiciona um novo livro
-  fireEvent.change(screen.getByLabelText('Título'), { target: { value: 'Livro C' } });
-  fireEvent.change(screen.getByLabelText('Autor'), { target: { value: 'Autor C' } });
-  fireEvent.click(screen.getByText('Salvar'));
-
-  // Verifica se o novo livro foi adicionado
-  expect(screen.getByText('Livro C - Autor C')).toBeInTheDocument();
-  
   // Exclui o livro
-  fireEvent.click(screen.getAllByRole('button', { name: /delete/i })[0]);
+  await act(async () => {
+    await waitFor(() => fireEvent.click(screen.getByLabelText('delete')));
+  });
+
 
   // Verifica se o livro foi removido, aguardando a atualização do DOM
   await waitFor(() => {
     expect(screen.queryByText('Livro C - Autor C')).not.toBeInTheDocument();
   }, { timeout: 5000 });
 });
-*/
