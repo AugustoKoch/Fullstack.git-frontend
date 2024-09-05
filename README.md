@@ -1,20 +1,20 @@
-### Construção da Aplicação de Gestão de Livros e Usuários com React e Material-UI
+### Gestão de Livros e Usuários com React e Material-UI
 
 - - -
 
 #### Índice
 
 1.  [Introdução](#introdução)
-2.  [Tecnologias Utilizadas](#tecnologias-utilizadas)
-3.  [Estrutura da Aplicação](#estrutura-da-aplicação)
-4.  [Componentes](#componentes)
+2.  [Como Executar a Aplicação](#como-executar-a-aplicação)
+3.  [Tecnologias Utilizadas](#tecnologias-utilizadas)
+4.  [Estrutura da Aplicação](#estrutura-da-aplicação)
+5.  [Componentes](#componentes)
     *   [Componente LivroList](#componente-livrolist)
     *   [Componente UsuarioList](#componente-usuariolist)
-5.  [Testes Unitários](#testes-unitários)
+6.  [Testes Unitários](#testes-unitários)
     *   [Estrutura dos Testes](#estrutura-dos-testes)
-    *   [Como Executar os Testes](#como-executar-os-testes)
-6.  [Como Executar a Aplicação](#como-executar-a-aplicação)
-7.  [Conclusão](#conclusão)
+    *   [Como Executar os Testes](#como-executar-os-testes) 
+
 
 - - -
 
@@ -22,9 +22,35 @@
 
 Este documento visa explicar detalhadamente a construção de uma aplicação web simples para gerenciamento de livros e usuários. A aplicação foi desenvolvida utilizando **React**, uma biblioteca JavaScript popular para construção de interfaces de usuário, e **Material-UI**, uma biblioteca de componentes estilizados seguindo o design system do Google.
 
-A aplicação permite que os usuários realizem operações de **CRUD** (Create, Read, Update, Delete) tanto para livros quanto para usuários. Além disso, foram implementados testes unitários para garantir a funcionalidade correta dos componentes.
+A aplicação permite que os usuários se conectem em uma API no backend e realizem operações de **CRUD** (Create, Read, Update, Delete) tanto para livros quanto para usuários. Além disso, foram implementados testes unitários para garantir a funcionalidade correta dos componentes.
 
 - - -
+
+### Como Executar a Aplicação
+
+1.  **Clone o Repositório**: Se ainda não tem o código, clone o repositório do projeto:
+
+```
+git clone https://github.com/AugustoKoch/Fullstack.git-frontend.git
+```
+
+2.  **Instale as Dependências**: Navegue até o diretório do projeto e instale as dependências necessárias:
+
+```
+npm install
+```
+
+3.  **Execute a Aplicação**: Após a instalação das dependências, você pode rodar a aplicação:
+
+```
+npm start
+```
+
+Isso iniciará o servidor de desenvolvimento, e a aplicação estará disponível no navegador em `http://localhost:3000`.
+
+Para garantir que os caminhos para sua API estejam corretos, revise-os em LivroList e UsuarioList
+
+---
 
 ### Tecnologias Utilizadas
 
@@ -154,13 +180,7 @@ Cada componente tem sua própria classe de teste, por exemplo, `LivroList.test.j
 
 #### Como Executar os Testes
 
-1.  **Instalar Dependências de Teste**: Se ainda não estiverem instaladas, execute:
-
-```
-npm install --save-dev @testing-library/react @testing-library/jest-dom @testing-library/user-event jest
-```
-
-2.  **Executar os Testes**: Para rodar todos os testes, execute:
+Para rodar todos os testes, execute:
 
 ```
 npm test
@@ -174,26 +194,3 @@ npm test LivroList.test.js
 
 Os testes utilizarão o Jest e o React Testing Library para verificar se as operações em cada componente funcionam como esperado.
 
-- - -
-
-### Como Executar a Aplicação
-
-1.  **Clone o Repositório**: Se ainda não tem o código, clone o repositório do projeto:
-
-```
-git clone <url-do-repositorio>
-```
-
-2.  **Instale as Dependências**: Navegue até o diretório do projeto e instale as dependências necessárias:
-
-```
-npm install
-```
-
-3.  **Execute a Aplicação**: Após a instalação das dependências, você pode rodar a aplicação:
-
-```
-npm start
-```
-
-Isso iniciará o servidor de desenvolvimento, e a aplicação estará disponível no navegador em `http://localhost:3000`.
