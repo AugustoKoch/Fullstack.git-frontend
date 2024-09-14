@@ -21,66 +21,86 @@ function UsuarioList() {
   const [email, setEmail] = useState('');
   const [editId, setEditId] = useState(null);
 
+  // Carregar os usuários do backend na inicialização
   useEffect(() => {
-    fetch('http://localhost:8080/api/usuarios')
+    const token = localStorage.getItem('token'); // Obtém o token do localStorage
+  
+    fetch('http://localhost:8080/api/usuarios', {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}` // Adiciona o token no cabeçalho
+      }
+    })
       .then(response => response.json())
       .then(data => setUsuarios(data))
       .catch(error => console.error('Erro ao buscar usuários:', error));
   }, []);
 
+  // Função para salvar um novo usuário ou atualizar um existente
   const handleSave = () => {
     const usuario = { nome, email };
-    
+    const token = localStorage.getItem('token'); // Obtém o token do localStorage
+  
     if (editId) {
       // Atualizar um usuário existente
       fetch(`http://localhost:8080/api/usuarios/${editId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}` // Adiciona o token no cabeçalho
         },
         body: JSON.stringify(usuario),
       })
-      .then(response => response.json())
-      .then(updatedUsuario => {
-        setUsuarios(usuarios.map(usuario => usuario.id === editId ? updatedUsuario : usuario));
-        setEditId(null);
-        setNome('');
-        setEmail('');
-      })
-      .catch(error => console.error('Erro ao atualizar usuário:', error));
+        .then(response => response.json())
+        .then(updatedUsuario => {
+          setUsuarios(usuarios.map(usuario => usuario.id === editId ? updatedUsuario : usuario));
+          setEditId(null);
+          setNome('');
+          setEmail('');
+        })
+        .catch(error => console.error('Erro ao atualizar usuário:', error));
     } else {
       // Criar um novo usuário
       fetch('http://localhost:8080/api/usuarios', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}` // Adiciona o token no cabeçalho
         },
         body: JSON.stringify(usuario),
       })
-      .then(response => response.json())
-      .then(newUsuario => {
-        setUsuarios([...usuarios, newUsuario]);
-        setNome('');
-        setEmail('');
-      })
-      .catch(error => console.error('Erro ao salvar usuário:', error));
+        .then(response => response.json())
+        .then(newUsuario => {
+          setUsuarios([...usuarios, newUsuario]);
+          setNome('');
+          setEmail('');
+        })
+        .catch(error => console.error('Erro ao salvar usuário:', error));
     }
   };
 
+  // Função para editar um usuário (preencher o formulário com os dados do usuário selecionado)
   const handleEdit = (usuario) => {
     setNome(usuario.nome);
     setEmail(usuario.email);
     setEditId(usuario.id);
   };
 
+  // Função para excluir um usuário da lista
   const handleDelete = (id) => {
+    const token = localStorage.getItem('token'); // Obtém o token do localStorage
+  
     fetch(`http://localhost:8080/api/usuarios/${id}`, {
       method: 'DELETE',
+      headers: {
+        'Authorization': `Bearer ${token}` // Adiciona o token no cabeçalho
+      }
     })
-    .then(() => {
-      setUsuarios(usuarios.filter(usuario => usuario.id !== id));
-    })
-    .catch(error => console.error('Erro ao excluir usuário:', error));
+      .then(() => {
+        setUsuarios(usuarios.filter(usuario => usuario.id !== id));
+      })
+      .catch(error => console.error('Erro ao excluir usuário:', error));
   };
 
   return (
