@@ -1,4 +1,3 @@
-
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Container from '@mui/material/Container';
@@ -9,6 +8,7 @@ import image from '../assets/home-image.jpg'; // Import the image
 
 function Home() {
   return (
+    
     <Container maxWidth="sm">
       <Box textAlign="center" mt={5}>
         <Typography variant="h4" gutterBottom>
