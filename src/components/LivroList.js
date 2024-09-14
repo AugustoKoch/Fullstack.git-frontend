@@ -22,25 +22,42 @@ function LivroList() {
 
   // Carregar os livros do backend na inicialização
   useEffect(() => {
-    fetch('http://localhost:8080/api/livros')
-      .then(response => response.json())
+    const token = localStorage.getItem('token'); // Obtém o token do localStorage
+  
+    fetch('http://localhost:8080/api/livros', {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}` // Adiciona o token no cabeçalho
+      }
+    })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Falha na autenticação');
+        }
+        return response.json();
+      })
       .then(data => setLivros(data))
       .catch(error => console.error('Erro ao buscar livros:', error));
   }, []);
+  
 
   // Função para salvar um novo livro ou atualizar um existente
   const handleSave = () => {
     const livro = { titulo, autor };
-
+  
     const method = editId ? 'PUT' : 'POST';
     const url = editId
       ? `http://localhost:8080/api/livros/${editId}`
       : 'http://localhost:8080/api/livros';
-
+  
+    const token = localStorage.getItem('token'); // Obtém o token do localStorage
+  
     fetch(url, {
       method,
       headers: {
         'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`, // Adiciona o token no cabeçalho
       },
       body: JSON.stringify(livro),
     })
@@ -55,9 +72,9 @@ function LivroList() {
             return [...prevLivros, data];
           }
         });
-        setTitulo('');
-        setAutor('');
-        setEditId(null);
+        setTitulo('');  // Limpa o título após salvar
+        setAutor('');   // Limpa o autor após salvar
+        setEditId(null); // Reseta o estado de edição
       })
       .catch(error => console.error('Erro ao salvar livro:', error));
   };
@@ -69,16 +86,21 @@ function LivroList() {
     setEditId(livro.id);
   };
 
-  // Função para excluir um livro da lista
-  const handleDelete = (id) => {
-    fetch(`http://localhost:8080/api/livros/${id}`, {
-      method: 'DELETE',
+// Função para excluir um livro da lista
+const handleDelete = (id) => {
+  const token = localStorage.getItem('token'); // Obtém o token do localStorage
+  
+  fetch(`http://localhost:8080/api/livros/${id}`, {
+    method: 'DELETE',
+    headers: {
+      'Authorization': `Bearer ${token}` // Adiciona o token no cabeçalho
+    }
+  })
+    .then(() => {
+      setLivros(livros.filter(livro => livro.id !== id));
     })
-      .then(() => {
-        setLivros(livros.filter(livro => livro.id !== id));
-      })
-      .catch(error => console.error('Erro ao deletar livro:', error));
-  };
+    .catch(error => console.error('Erro ao deletar livro:', error));
+};
 
   return (
     <Container sx={{ paddingTop: '80px' }}>
