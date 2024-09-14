@@ -1,34 +1,23 @@
-
 import React from 'react';
-import { BrowserRouter as Router, Route, Switch, Link } from 'react-router-dom';
-import LivroList from './components/LivroList';
-import UsuarioList from './components/UsuarioList';
-import Home from './components/Home';
-import './App.css';
+import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
+import Login from './components/Login';
+import Layout from './components/Layout';
 
 function App() {
+
+  const isAuthenticated = !!localStorage.getItem('token');
+
   return (
     <Router>
-      <div className="App">
-        <nav>
-          <ul>
-            <li>
-              <Link to="/">Home</Link>
-            </li>
-            <li>
-              <Link to="/livros">Gerenciar Livros</Link>
-            </li>
-            <li>
-              <Link to="/usuarios">Gerenciar Usuários</Link>
-            </li>
-          </ul>
-        </nav>
-        <Switch>
-          <Route path="/" exact component={Home} />
-          <Route path="/livros" component={LivroList} />
-          <Route path="/usuarios" component={UsuarioList} />
-        </Switch>
-      </div>
+      <Switch>
+        <Route path="/login" component={Login} />
+        {isAuthenticated ? (
+          <Route path="/" component={Layout} />
+        ) : (
+          <Route path="/" exact component={Login} />
+        )}
+        
+      </Switch>
     </Router>
   );
 }
